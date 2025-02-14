@@ -31,16 +31,23 @@ type ThinkBoxProps = {
   thinkBlock: string;
   expanded: boolean;
   onExpand: () => void;
+  isThinking?: boolean;
 };
 
-export const ThinkBox = ({ thinkBlock, expanded, onExpand }: ThinkBoxProps) => {
+export const ThinkBox = ({ thinkBlock, expanded, onExpand, isThinking = true }: ThinkBoxProps) => {
+  const hasContent = thinkBlock.trim().length > 0;
+  
   return (
     <div>
-      <button className="think-button" onClick={() => onExpand()}>
-        Thinking... <Chevron expanded={expanded} />
+      <button 
+        className="think-button" 
+        onClick={hasContent ? onExpand : undefined}
+      >
+        {isThinking ? "Thinking..." : "Done"}
+        {(isThinking || hasContent) && <Chevron expanded={expanded} />}
       </button>
 
-      {expanded && <div className="think">{thinkBlock}</div>}
+      {expanded && hasContent && <div className="think">{thinkBlock}</div>}
     </div>
   );
 };

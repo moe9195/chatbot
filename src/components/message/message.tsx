@@ -22,15 +22,23 @@ const parseMessage = (message: string) => {
 
   if (message.includes(CLOSE_TAG)) {
     const [thinkBlock, textBlock] = message.split(CLOSE_TAG);
-    return { thinkBlock: thinkBlock.replace(OPEN_TAG, ""), textBlock };
+    return { 
+      thinkBlock: thinkBlock.replace(OPEN_TAG, ""), 
+      textBlock,
+      isThinking: false 
+    };
   }
 
   // If we don't have a closing tag but have an opening tag, we're still thinking
   if (message.includes(OPEN_TAG)) {
-    return { thinkBlock: message.replace(OPEN_TAG, ""), textBlock: "" };
+    return { 
+      thinkBlock: message.replace(OPEN_TAG, ""), 
+      textBlock: "",
+      isThinking: true 
+    };
   }
 
-  return { thinkBlock: "", textBlock: message };
+  return { thinkBlock: "", textBlock: message, isThinking: false };
 };
 
 const processLatexNotation = (text: string) => {
@@ -45,8 +53,9 @@ export const Message = ({
   isHuman,
   expanded,
   onExpand,
+  isThinking = false
 }: MessageProps) => {
-  const { textBlock, thinkBlock } = useMemo(
+  const { textBlock, thinkBlock, isThinking: isThinkingFromParse } = useMemo(
     () => parseMessage(message),
     [message]
   );
@@ -56,6 +65,9 @@ export const Message = ({
     const processedThinkBlock = processLatexNotation(thinkBlock);
     return { processedTextBlock, processedThinkBlock };
   }, [textBlock, thinkBlock]);
+
+  // Use either the prop or parsed thinking state
+  const finalIsThinking = isThinking || isThinkingFromParse;
 
   return (
     <div className={isHuman ? "message human" : "message bot"}>
@@ -74,6 +86,7 @@ export const Message = ({
                 thinkBlock={processedThinkBlock}
                 expanded={expanded}
                 onExpand={() => onExpand()}
+                isThinking={finalIsThinking}
               />
               <div className="text">
                 <Markdown
