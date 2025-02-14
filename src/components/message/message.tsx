@@ -1,13 +1,11 @@
-import { useMemo } from "react";
-import "./styles.css";
+import { useMemo, useEffect, useState, useRef } from "react";
 import "katex/dist/katex.min.css";
-
 import { ThinkBox } from "./think-box";
 import Markdown from "react-markdown";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
-
-// Explicitly export the types
+import { Card, CardContent, CardHeader, Avatar, Typography } from "@mui/material";
+import AutoAwesomeOutlinedIcon from '@mui/icons-material/AutoAwesomeOutlined';
 export interface MessageProps {
   message: string;
   isHuman: boolean;
@@ -22,23 +20,21 @@ const parseMessage = (message: string) => {
 
   if (message.includes(CLOSE_TAG)) {
     const [thinkBlock, textBlock] = message.split(CLOSE_TAG);
-    return { 
-      thinkBlock: thinkBlock.replace(OPEN_TAG, ""), 
+    return {
+      thinkBlock: thinkBlock.replace(OPEN_TAG, ""),
       textBlock,
-      isThinking: false 
+      isThinking: false
     };
   }
 
-  // If we don't have a closing tag but have an opening tag, we're still thinking
   if (message.includes(OPEN_TAG)) {
-    return { 
-      thinkBlock: message.replace(OPEN_TAG, ""), 
+    return {
+      thinkBlock: message.replace(OPEN_TAG, ""),
       textBlock: "",
-      isThinking: true 
     };
   }
 
-  return { thinkBlock: "", textBlock: message, isThinking: false };
+  return { thinkBlock: "", textBlock: message, };
 };
 
 const processLatexNotation = (text: string) => {
@@ -53,9 +49,11 @@ export const Message = ({
   isHuman,
   expanded,
   onExpand,
-  isThinking = false
 }: MessageProps) => {
-  const { textBlock, thinkBlock, isThinking: isThinkingFromParse } = useMemo(
+  const thinkingTime = useRef(0);
+  const thinkingInterval = useRef<NodeJS.Timeout | null>(null);
+
+  const { textBlock, thinkBlock } = useMemo(
     () => parseMessage(message),
     [message]
   );
@@ -66,29 +64,56 @@ export const Message = ({
     return { processedTextBlock, processedThinkBlock };
   }, [textBlock, thinkBlock]);
 
-  // Use either the prop or parsed thinking state
-  const finalIsThinking = isThinking || isThinkingFromParse;
+
+  const isThinking = textBlock.length === 0;
+
+  useEffect(() => {
+    if (isThinking && !thinkingInterval.current) {
+      thinkingInterval.current = setInterval(() => {
+        thinkingTime.current += 1;
+      }, 1000);
+    } else if (!isThinking && thinkingInterval.current) {
+      clearInterval(thinkingInterval.current);
+      thinkingInterval.current = null;
+    }
+
+    return () => {
+      if (thinkingInterval.current) {
+        clearInterval(thinkingInterval.current);
+        thinkingInterval.current = null;
+      }
+    };
+
+  }, [isThinking]);
+
 
   return (
-    <div className={isHuman ? "message human" : "message bot"}>
-      <div className="content">
+    <Card sx={{ backgroundColor: isHuman ? 'primary.main' : 'secondary.main', color: 'text.primary', mb: 2 }}>
+      <CardHeader
+        title={isHuman ? 'Human' : 'AI'}
+        avatar={
+          <Avatar sx={{ bgcolor: isHuman ? 'info.dark' : 'error.dark', width: 36, height: 36 }}>
+            {!isHuman && <AutoAwesomeOutlinedIcon sx={{
+              width: 18,
+              height: 18,
+              color: 'primary.main',
+            }} />}
+          </Avatar>
+        }
+      />
+      <CardContent>
         {isHuman ? (
-          <div className="avatar-human">MR</div>
+          <Typography variant="body1">{message}</Typography>
         ) : (
-          <div className="avatar-bot">DS</div>
-        )}
-        <div className="response">
-          {isHuman ? (
-            <div className="text">{message}</div>
-          ) : (
-            <>
-              <ThinkBox
-                thinkBlock={processedThinkBlock}
-                expanded={expanded}
-                onExpand={() => onExpand()}
-                isThinking={finalIsThinking}
+          <>
+            <ThinkBox
+              thinkBlock={processedThinkBlock}
+              expanded={expanded}
+                onExpand={onExpand}
+                isThinking={isThinking}
+                thoughtFor={thinkingTime.current}
               />
-              <div className="text">
+              <Typography variant="body1">
                 <Markdown
                   remarkPlugins={[remarkMath]}
                   rehypePlugins={[
@@ -97,11 +122,10 @@ export const Message = ({
                 >
                   {processedTextBlock}
                 </Markdown>
-              </div>
-            </>
-          )}
-        </div>
-      </div>
-    </div>
+            </Typography>
+          </>
+        )}
+      </CardContent>
+    </Card>
   );
 };

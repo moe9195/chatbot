@@ -1,5 +1,6 @@
 import { useState } from "react";
-import "./App.css";
+import { Box, Button, CircularProgress, Typography, IconButton } from "@mui/material";
+import ClearIcon from "@mui/icons-material/Clear";
 import { Chatbox, ChatWindow } from "./components";
 import { usePullModel, useChatMutation, useChatHistory } from "./hooks";
 import { Message as ChatMessage } from "ollama";
@@ -42,27 +43,22 @@ function App() {
   };
 
   return (
-    <>
-      {isPulling && <div className="loading">Loading...</div>}
+    <Box display="flex" flexDirection="column" justifyContent="space-between" height="100vh" p={2}>
+      {isPulling && (
+        <Box display="flex" justifyContent="center" alignItems="center" height="100%">
+          <CircularProgress />
+        </Box>
+      )}
       {isPulled && (
         <>
-          <button
-            style={{
-              position: "fixed",
-              top: 8,
-              right: 8,
-              borderRadius: "50%",
-              fontSize: 12,
-              width: 32,
-              height: 32,
-              padding: 0,
-            }}
+          <IconButton
+            color="error"
             onClick={clearHistory}
+            sx={{ position: "fixed", top: 8, right: 8, borderRadius: "50%", fontSize: 12, width: 32, height: 32, padding: 0 }}
           >
-            X
-          </button>
+            <ClearIcon />
+          </IconButton>
           <ChatWindow messages={messages} currentMessage={currentMessage} />
-
           <Chatbox
             onSend={onSendMessage}
             onStop={onStop}
@@ -70,8 +66,14 @@ function App() {
           />
         </>
       )}
-      {isErrorPulling && <div className="error">Failed to pull model</div>}
-    </>
+      {isErrorPulling && (
+        <Box display="flex" justifyContent="center" alignItems="center" height="100%">
+          <Typography variant="h6" color="error">
+            Failed to pull model
+          </Typography>
+        </Box>
+      )}
+    </Box>
   );
 }
 

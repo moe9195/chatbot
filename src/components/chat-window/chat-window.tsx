@@ -1,12 +1,12 @@
-import "./styles.css";
-import { Message } from "../message";
 import { useCallback, useState } from "react";
+import { Box } from "@mui/material";
+import { Message } from "../message";
 import { Message as ChatMessage } from "ollama";
 
-type ChatWindowProps = {
+interface ChatWindowProps {
   messages: ChatMessage[];
   currentMessage: ChatMessage | null;
-};
+}
 
 export const ChatWindow = ({ messages, currentMessage }: ChatWindowProps) => {
   const [expanded, setExpanded] = useState<Record<number, boolean>>({});
@@ -25,18 +25,16 @@ export const ChatWindow = ({ messages, currentMessage }: ChatWindowProps) => {
     : messages;
 
   return (
-    <div className="chat-window">
-      {messagesWithCurrentMessage.map((message, index) => {
-        return (
-          <Message
-            key={index}
-            message={message.content}
-            isHuman={message.role === "user"}
-            expanded={isExpanded(index)}
-            onExpand={() => onExpand(index)}
-          />
-        );
-      })}
-    </div>
+    <Box display="flex" flexDirection="column" gap={2} p={2}>
+      {messagesWithCurrentMessage.map((message, index) => (
+        <Message
+          key={index}
+          message={message.content}
+          isHuman={message.role === "user"}
+          expanded={isExpanded(index)}
+          onExpand={() => onExpand(index)}
+        />
+      ))}
+    </Box>
   );
 };

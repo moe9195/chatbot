@@ -1,53 +1,42 @@
-type ChevronProps = {
-  expanded: boolean;
-};
+import { Button, Collapse, Box, Typography } from "@mui/material";
+import { ChevronRight } from "@mui/icons-material";
 
-const Chevron = ({ expanded }: ChevronProps) => {
-  return (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      style={{
-        marginLeft: "8px",
-        display: "inline-block",
-        transition: "transform 0.2s ease",
-        transform: expanded ? "rotate(90deg)" : "rotate(0deg)",
-      }}
-    >
-      <path
-        d="M9 18L15 12L9 6"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-};
-
-type ThinkBoxProps = {
+interface ThinkBoxProps {
   thinkBlock: string;
   expanded: boolean;
+  isThinking: boolean;
+  thoughtFor: number;
   onExpand: () => void;
-  isThinking?: boolean;
-};
+}
 
-export const ThinkBox = ({ thinkBlock, expanded, onExpand, isThinking = true }: ThinkBoxProps) => {
-  const hasContent = thinkBlock.trim().length > 0;
-  
+export const ThinkBox = ({ thinkBlock, expanded, isThinking, thoughtFor, onExpand }: ThinkBoxProps) => {
+  const cleanThinkBlock = thinkBlock.trim();
+  const hasContent = cleanThinkBlock.length > 0;
+
   return (
-    <div>
-      <button 
-        className="think-button" 
+    <Box>
+      <Button
+        variant="contained"
+        size="small"
         onClick={hasContent ? onExpand : undefined}
+        endIcon={hasContent && (
+          <ChevronRight
+            sx={{
+              transition: "transform 0.2s",
+              transform: expanded ? "rotate(90deg)" : "rotate(0deg)"
+            }}
+          />
+        )}
       >
-        {isThinking ? "Thinking..." : "Done"}
-        {(isThinking || hasContent) && <Chevron expanded={expanded} />}
-      </button>
-
-      {expanded && hasContent && <div className="think">{thinkBlock}</div>}
-    </div>
+        {isThinking ? "Thinking..." : `Thought for ${thoughtFor} seconds`}
+      </Button>
+      <Collapse in={expanded && hasContent} timeout="auto" unmountOnExit>
+        <Box mt={2} p={2} bgcolor="grey.800" borderRadius={1}>
+          <Typography variant="body2" fontFamily="monospace">
+            {cleanThinkBlock}
+          </Typography>
+        </Box>
+      </Collapse>
+    </Box>
   );
 };
