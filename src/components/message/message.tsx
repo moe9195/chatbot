@@ -7,12 +7,14 @@ import Markdown from "react-markdown";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 
-type MessageProps = {
+// Explicitly export the types
+export interface MessageProps {
   message: string;
   isHuman: boolean;
   expanded: boolean;
   onExpand: () => void;
-};
+  isThinking?: boolean;
+}
 
 const parseMessage = (message: string) => {
   const OPEN_TAG = "<think>";
@@ -23,7 +25,12 @@ const parseMessage = (message: string) => {
     return { thinkBlock: thinkBlock.replace(OPEN_TAG, ""), textBlock };
   }
 
-  return { thinkBlock: message.replace(OPEN_TAG, ""), textBlock: "" };
+  // If we don't have a closing tag but have an opening tag, we're still thinking
+  if (message.includes(OPEN_TAG)) {
+    return { thinkBlock: message.replace(OPEN_TAG, ""), textBlock: "" };
+  }
+
+  return { thinkBlock: "", textBlock: message };
 };
 
 const processLatexNotation = (text: string) => {

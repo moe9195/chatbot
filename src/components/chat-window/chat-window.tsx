@@ -1,5 +1,5 @@
 import "./styles.css";
-import { Message } from "../message/message";
+import { Message } from "../message";
 import { useCallback, useState } from "react";
 import { Message as ChatMessage } from "ollama";
 

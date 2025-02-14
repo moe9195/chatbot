@@ -1,11 +1,11 @@
 import { useState } from "react";
 import "./App.css";
 import { Chatbox, ChatWindow } from "./components";
-import { usePullModel, useChatMutation } from "./hooks";
+import { usePullModel, useChatMutation, useChatHistory } from "./hooks";
 import { Message as ChatMessage } from "ollama";
 
 function App() {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const { messages, setMessages, clearHistory } = useChatHistory();
   const [currentMessage, setCurrentMessage] = useState<ChatMessage | null>(
     null
   );
@@ -41,11 +41,6 @@ function App() {
     setCurrentMessage(null);
   };
 
-  const clearAll = () => {
-    setMessages([]);
-    setCurrentMessage(null);
-  };
-
   return (
     <>
       {isPulling && <div className="loading">Loading...</div>}
@@ -62,7 +57,7 @@ function App() {
               height: 32,
               padding: 0,
             }}
-            onClick={clearAll}
+            onClick={clearHistory}
           >
             X
           </button>
