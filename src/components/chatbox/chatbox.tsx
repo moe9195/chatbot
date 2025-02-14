@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { Box, TextField, IconButton } from "@mui/material";
+import { Box, TextField, IconButton, TextareaAutosize } from "@mui/material";
 import StopIcon from "@mui/icons-material/Stop";
+
 
 interface ChatboxProps {
   onSend: (text: string) => void;
@@ -27,7 +28,7 @@ export const Chatbox = ({ onSend, onStop, isHuman }: ChatboxProps) => {
   };
 
   return (
-    <Box display="flex" justifyContent="center" p={2} position="sticky" bottom={0} bgcolor="background.paper" boxShadow={3} borderRadius={2} mb={2}>
+    <Box display="flex" justifyContent="center" p={2} position="sticky" bottom={16} bgcolor="background.paper" boxShadow={3} borderRadius={2} >
       <TextField
         value={value}
         onChange={handleChange}
@@ -35,7 +36,8 @@ export const Chatbox = ({ onSend, onStop, isHuman }: ChatboxProps) => {
         placeholder="Enter your text here"
         fullWidth
         multiline
-        rows={2}
+        minRows={2}
+        maxRows={8}
         variant="outlined"
         disabled={!isHuman}
         InputProps={{
